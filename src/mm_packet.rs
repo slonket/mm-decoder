@@ -18,9 +18,9 @@ pub enum MmSpeed {
 /// MM1. The meaning of the remaining four bits is quite complex and can differ depending on the leading "speed" bits
 /// of each pair.
 /// 
-/// This type is a superset of every possible set of information contained in a data packet. The simplest is `OldSpeed`
-/// which contains MM1 type speed information only. `NewSpeed` contains both MM1 speed information and absolute direction.
-/// `Function` contains the MM1 speed information along with one function F1-F4 status.
+/// This type is a superset of every possible set of information contained in a data packet. The simplest is [`OldSpeed`](MmLocoCommand::OldSpeed)
+/// which contains MM1 type speed information only. [`NewSpeed`](MmLocoCommand::NewSpeed) contains both MM1 speed information and absolute direction.
+/// [`Function`](MmLocoCommand::Function) contains the MM1 speed information along with one function F1-F4 status.
 pub enum MmLocoCommand {
     OldSpeed(MmSpeed), // MM1 (old) speed
     NewSpeed{ speed: MmSpeed, direction: bool }, // MM2 (new) speed with absolute directon
@@ -37,7 +37,7 @@ pub struct MmLocoPacket {
 
 impl MmLocoPacket {
 
-    /// Produces a new `MmLocoPacket` using data from an `MmMachine`.
+    /// Produces a new [`MmLocoPacket`] using data from an [`MmMachine`](crate::MmMachine).
     pub fn new(address: u8, middle: bool, data: u8) -> Self {
         Self {
             address,
@@ -101,7 +101,7 @@ impl MmLocoPacket {
         }
     }
 
-    /// Decodes information from both MM1 (old) and MM2 (new). See `MmLocoCommand` for more detail.
+    /// Decodes information from both MM1 (old) and MM2 (new). See [`MmLocoCommand`] for more detail.
     pub fn command(&self) -> MmLocoCommand {
         let d = self.data;
 
@@ -194,7 +194,7 @@ pub struct MmRawAccPacket {
 
 impl MmRawAccPacket {
 
-    /// Produces a new `MmRawAccPacket` using data from an `MmMachine`.
+    /// Produces a new [`MmRawAccPacket`] using data from an [`MmMachine`](crate::MmMachine).
     pub fn new(address: u8, middle: bool, data: u8) -> Self {
         Self {
             address,

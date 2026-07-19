@@ -4,11 +4,11 @@
 
 ## State Machine Usage
 
-A state machine can be created using `MmLocoMachine::new();` for locomotive-frequency transmission and `MmAccMachine::new();` for accessory-frequency transmission. Both can be initialised as `static`. The following can be capture by these two machines:
+A state machine can be created using `MmLocoMachine::new();` for locomotive-frequency transmission and `MmAccMachine::new();` for accessory-frequency transmission. Both can be initialised as `static`. The following can be captured by these two machines:
 - `MmLocoMachine` - MM1 locomotive and MM2 locomotive and function packets.
-- `MmLocoMachine` - MM1 function packets and MM1/MM2 accessory packets.
+- `MmAccMachine` - MM1 function packets and MM1/MM2 accessory packets.
 
-The state machines must be fed a series of pulse durations representing track data using `advance(pulse: u16)`, where pulse is a unit of track data. The machines are "polarity insensitive"; data must be a contiguous series of high and low pulse durations. The unit for these pulses is microseconds. For example, a locomotive-frequency motorola '1' would be respresented as two values `26` and `182`.
+The state machines must be fed a series of pulse durations representing track data using `advance(pulse: u16)`, where pulse is a unit of track data. The machines are "polarity insensitive"; data must be a contiguous series of high and low pulse durations. The unit for these pulses is microseconds. For example, a locomotive-frequency motorola '1' would be represented as two values `26` and `182`.
 
 Short pulse durations have a tolerance of ±5 and long pulse durations have a tolerance of ±10. If your transduced data has some shift from nominal values, this should be corrected for outside of the state machines. The tolerance does not account for transducer issues.
 

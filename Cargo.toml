@@ -1,6 +1,6 @@
 [package]
 name = "mm-decoder"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
 authors = ["Ava Wolfe <ava.codie.wolfe@gmail.com>"]
 description = "A no-std Rust crate for decoding Märklin-Motorola protocol"

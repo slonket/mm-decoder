@@ -97,6 +97,8 @@ enum MmState {
 }
 
 /// A Marklin-Motorola protocol decoder. Feed a contiguous series of microsecond-resolution track pulses. Any invalid pulse will reset the machine.
+///
+/// This struct is not intended for direct use. Use [`MmLocoMachine`] or [`MmAccMachine`] instead.
 pub struct MmMachine<T: MmTiming> {
     // state machine values
     state: MmState,
@@ -111,7 +113,7 @@ pub struct MmMachine<T: MmTiming> {
 
 impl<T: MmTiming> MmMachine<T> {
 
-    /// Create a new MmMachine.
+    /// Create a new [`MmMachine`].
     /// Can be static.
     pub const fn new() -> Self {
         Self {
@@ -124,7 +126,7 @@ impl<T: MmTiming> MmMachine<T> {
         }
     }
 
-    /// Parse a pulse (in microseconds) through the MmMachine.
+    /// Parse a pulse (in microseconds) through the [`MmMachine`].
     /// Will produce a packet after a series of contiguous pulses representing a complete packet are parsed.
     pub fn advance(&mut self, pulse: u16) -> Option<T::Packet> {
 
@@ -139,9 +141,9 @@ impl<T: MmTiming> MmMachine<T> {
         }
 
         // MM bit resolver
-        // Actions for the state machine are taken on the first "half pulse" without waiting for the compliment
-        // Instead, there is a check to see if a compliment mismatches, which will cause a reset of the FSM.
-        // The reason for this is that the final "bit" will never have a complimentary pulse; rather, there is
+        // Actions for the state machine are taken on the first "half pulse" without waiting for the complement
+        // Instead, there is a check to see if a complement mismatches, which will cause a reset of the FSM.
+        // The reason for this is that the final "bit" will never have a complementary pulse; rather, there is
         // a long low period until the next packet.
         let mm_bit = match self.prev_pulse {
             MmPulse::IdlePrev => {
@@ -155,15 +157,15 @@ impl<T: MmTiming> MmMachine<T> {
                 }
             }
             _ => {
-                // A stored pulse means this is the complimentary pulse. Compare to find a mismatch.
+                // A stored pulse means this is the complementary pulse. Compare to find a mismatch.
                 // If a mismatch happens, it means the FSM is disorientated and has read between bits (one pulse
                 // out of sync). There is no recovery from this for the current packet so just reset. This case
-                // is essentially impossible as every packet starts orientated do to the "Invalid" reset check.
+                // is essentially impossible as every packet starts orientated due to the "Invalid" reset check.
                 if self.prev_pulse == mm_pulse {
                     self.reset();
                 }
                 // Even if there's no mismatch (normal case) we must reset the previous pulse to idle (waiting for
-                // leading pulse of interest) and return None - no FSM action taken on complimentary pulse.
+                // leading pulse of interest) and return None - no FSM action taken on complementary pulse.
                 self.prev_pulse = MmPulse::IdlePrev;
                 return None;
             }
@@ -218,7 +220,7 @@ impl<T: MmTiming> MmMachine<T> {
         None
     }
 
-    /// Resets the MmMachine. Used when illegal conditions are met.
+    /// Resets the [`MmMachine`]. Used when illegal conditions are met.
     #[inline]
     fn reset(&mut self) {
         // the packet doesn't need resetting as there's no indexing variable
