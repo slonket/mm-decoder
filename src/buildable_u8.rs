@@ -1,20 +1,20 @@
 /// A bit-by-bit byte builder. Shifts bits in from LSB until 8 bits have been pushed,
 /// then returns the completed byte.
-pub struct BuildableU8 {
+pub(crate) struct BuildableU8 {
     data: u8,
     index: u8,
 }
 
 impl BuildableU8 {
 
-    pub const fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             data: 0,
             index: 0,
         }
     }
 
-    pub fn push(&mut self, bit: u8) -> Option<u8> {
+    pub(crate) fn push(&mut self, bit: u8) -> Option<u8> {
 
         self.data = (self.data << 1) | (bit & 0x01);
         self.index += 1;
