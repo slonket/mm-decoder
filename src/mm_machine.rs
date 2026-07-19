@@ -5,11 +5,10 @@ use crate::mm_packet::{MmLocoPacket, MmRawAccPacket};
 pub type MmLocoMachine = MmMachine<MmLocoTiming>;
 pub type MmAccMachine = MmMachine<MmAccTiming>;
 
-/// MmTiming
-/// 
-/// The state machines are the same for locomotive and accessory MM packets, but the timing is different.
-/// Because of this, the state machine is made generic over the two pulse timing sets and their respective
-/// packet types.
+// MmTiming
+//
+// The state machines are the same for locomotive and accessory MM packets, but the timing is different.
+// Because of this, the state machine is made generic over the two pulse timing sets and their respective packet types.
 pub trait MmTiming {
     const SH_MIN: u16;
     const SH_MAX: u16;
@@ -48,7 +47,7 @@ impl MmTiming for MmAccTiming {
 
 
 
-/// MmPulse
+// MmPulse
 #[derive(Default, PartialEq, Clone, Copy)]
 enum MmPulse {
     Short,
@@ -87,7 +86,7 @@ impl From<MmBit> for u8 {
 
 
 
-/// MmMachine
+// MmMachine
 enum MmState {
     Address(BuildableU8),
     Middle(u8),
@@ -109,7 +108,8 @@ pub struct MmMachine<T: MmTiming> {
 
 impl<T: MmTiming> MmMachine<T> {
 
-    /// Create a new MmMachine. Can be static.
+    /// Create a new MmMachine.
+    /// Can be static.
     pub const fn new() -> Self {
         Self {
             state: MmState::Address(BuildableU8::new()),
@@ -121,7 +121,8 @@ impl<T: MmTiming> MmMachine<T> {
         }
     }
 
-    /// Parse a pulse (in microseconds) through the state machine. Will produce a packet when after a series of contiguous pulses representing the packet are parsed.
+    /// Parse a pulse (in microseconds) through the MmMachine.
+    /// Will produce a packet after a series of contiguous pulses representing a complete packet are parsed.
     pub fn advance(&mut self, pulse: u16) -> Option<T::Packet> {
 
         let mm_pulse = MmPulse::classify::<T>(pulse);
@@ -214,6 +215,7 @@ impl<T: MmTiming> MmMachine<T> {
         None
     }
 
+    /// Resets the MmMachine. Used when illegal conditions are met.
     #[inline]
     fn reset(&mut self) {
         // the packet doesn't need resetting as there's no indexing variable

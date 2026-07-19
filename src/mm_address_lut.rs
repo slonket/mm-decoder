@@ -4,7 +4,7 @@
 /// 
 /// TODO: Check these are all correct using OEM controllers.
 #[cfg_attr(target_os = "none", unsafe(link_section = ".rodata"))]
-pub static MM_ADDRESS_LUT: [u8; 256] = [
+pub(crate) static MM_ADDRESS_LUT: [u8; 256] = [
       80, 229,  54,  27, 193, 195, 194, 196,  18, 247,  72,  45,   9, 238,  63,  36,
       145, 153, 149, 157, 147, 155, 151, 159, 146, 154, 150, 158, 148, 156, 152, 160,
       6, 235,  60,  33, 217, 219, 218, 220,  24, 253,  78,  51,  15, 244,  69,  42,

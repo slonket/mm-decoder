@@ -1,12 +1,12 @@
 use crate::mm_address_lut::MM_ADDRESS_LUT;
 
-// wrapper to contain speed or change direction
+/// MM1 speed data also includes the reverse instruction. This type abstracts the true speed value (0-14) and reverse instruction as separate variants.
 pub enum MmSpeed {
     Reverse, // change direction
     Speed(u8) // actual speed (0-14)
 }
 
-/// `MmLocoCommand` - MM loco packet instruction abstracted from the data bits.
+/// MM loco packet instruction abstracted from the data bits.
 /// 
 /// The data section of an MM packet is complex due to MM2's protocol extension. In MM1, the 8 bits of data
 /// are actually 4 paired bits (every two bits are the same). This makes for only 16 values, and thus, 16 different
@@ -27,7 +27,7 @@ pub enum MmLocoCommand {
     Function{ speed: MmSpeed, function: u8, state: bool } // MM2 (new) speed with function
 }
 
-/// MmLocoPacket
+/// A locomotive type packet.
 #[derive(PartialEq)]
 pub struct MmLocoPacket {
     address: u8,
@@ -36,6 +36,8 @@ pub struct MmLocoPacket {
 }
 
 impl MmLocoPacket {
+
+    /// Produces a new `MmLocoPacket` using data from an `MmMachine`.
     pub fn new(address: u8, middle: bool, data: u8) -> Self {
         Self {
             address,
@@ -44,10 +46,9 @@ impl MmLocoPacket {
         }
     }
 
-    /// Returns a decimal reprenstation of the trinary address.
-    /// This function currently only allows for the 80 addresses as in the original Marklin-motorola protocol and ignores
-    /// extended addresses that have since been implemented. As such, addresses that are considered illegal will return None.
-    /// This includes the idle packet address.
+    /// Returns a decimal reprenstation of the packet's trinary address in the range 0-80.
+    /// This is done using a trinary-to-decimal conversion algorithm.
+    /// An address of 0 represents the idle packet address.
     pub fn address(&self) -> Option<u8> {
         let mut ret_address: u8 = 0;
 
@@ -72,7 +73,10 @@ impl MmLocoPacket {
     }
 
     /// Returns an address in the range of 0-255 (u8) using the extended motorola address encoding.
-    /// This encoding uses the trinary-illegal values to encode the addresses 81-255. An address of 0 represents the idle address.
+    /// This is achieved by indexing a LUT with the raw address data.
+    /// The LUT is a superset of the standard 0-80 range.
+    /// This encoding uses the trinary-illegal values to encode the addresses 81-255.
+    /// An address of 0 represents the idle packet address.
     pub fn ext_address(&self) -> u8 {
         MM_ADDRESS_LUT[self.address as usize]
     }
@@ -82,7 +86,7 @@ impl MmLocoPacket {
         self.middle
     }
 
-    /// Exclusively decodes information from MM1 (old).
+    /// Exclusively decodes speed and reverse information from MM1 (old).
     pub fn speed(&self) -> MmSpeed {
         let d = self.data;
         let dcba: u8 = 
@@ -97,7 +101,7 @@ impl MmLocoPacket {
         }
     }
 
-    /// Decodes information from both MM1 (old) and MM2 (new).
+    /// Decodes information from both MM1 (old) and MM2 (new). See `MmLocoCommand` for more detail.
     pub fn command(&self) -> MmLocoCommand {
         let d = self.data;
 
@@ -170,16 +174,17 @@ impl MmLocoPacket {
     }
 }
 
-/// `MmAccCommand` - MM accessory packet instruction abstracted from the data bits.
+/// MM accessory packet instruction abstracted from the data bits.
 /// 
-/// The higher frequency MM accessory packets are also used for locomotive functions in MM1. This is determined
+/// The higher frequency MM accessory packets are also used for locomotive functions (F1-F4) in MM1. This is determined
 /// by the middle bits; 1 = accessory, 0 = loco function.
 pub enum MmAccCommand {
     Acc(MmAccPacket),
     Func(MmFuncPacket),
 }
 
-// MmAccPacket
+/// An undetermined packet of double-frequency (accessory) transmission.
+/// Can contain either accessory command or MM1 locomotive function command information.
 #[derive(PartialEq)]
 pub struct MmRawAccPacket {
     address: u8,
@@ -189,6 +194,7 @@ pub struct MmRawAccPacket {
 
 impl MmRawAccPacket {
 
+    /// Produces a new `MmRawAccPacket` using data from an `MmMachine`.
     pub fn new(address: u8, middle: bool, data: u8) -> Self {
         Self {
             address,
@@ -197,7 +203,7 @@ impl MmRawAccPacket {
         }
     }
 
-    // Resolves the type as either accessory or loco functions
+    /// Resolves the type as either accessory or loco function.
     pub fn get_type(self) -> MmAccCommand {
         match self.middle {
             false => MmAccCommand::Acc(MmAccPacket { address: self.address, data: self.data }),
@@ -206,16 +212,17 @@ impl MmRawAccPacket {
     }
 }
 
+/// An accessory type packet.
 pub struct MmAccPacket {
     address: u8,
     data: u8,
 }
 
 impl MmAccPacket {
-    /// Returns a decimal reprenstation of the trinary address.
-    /// This function currently only allows for the 80 addresses as in the original Marklin-motorola protocol and ignores
-    /// extended addresses that have since been implemented. As such, addresses that are considered illegal will return None.
-    /// This includes the idle packet address.
+
+    /// Returns a decimal reprenstation of the packet's trinary address in the range 0-80.
+    /// This is done using a trinary-to-decimal conversion algorithm.
+    /// An address of 0 represents the idle packet address.
     pub fn address(&self) -> Option<u8> {
         let mut ret_address: u8 = 0;
 
@@ -240,12 +247,15 @@ impl MmAccPacket {
     }
 
     /// Returns an address in the range of 0-255 (u8) using the extended motorola address encoding.
-    /// This encoding uses the trinary-illegal values to encode the addresses 81-255. An address of 0 represents the idle address.
+    /// This is achieved by indexing a LUT with the raw address data.
+    /// The LUT is a superset of the standard 0-80 range.
+    /// This encoding uses the trinary-illegal values to encode the addresses 81-255.
+    /// An address of 0 represents the idle packet address.
     pub fn ext_address(&self) -> u8 {
         MM_ADDRESS_LUT[self.address as usize]
     }
 
-    // Provides the port (0..7) and its corresponding state
+    /// Provides the accessory port (0..7) and its corresponding state.
     pub fn output(&self) -> (u8, bool) {
         let d = self.data;
 
@@ -260,16 +270,17 @@ impl MmAccPacket {
     }
 }
 
+/// An MM1 function (F1-F4) packet.
 pub struct MmFuncPacket {
     address: u8,
     data: u8,
 }
 
 impl MmFuncPacket {
-    /// Returns a decimal reprenstation of the trinary address.
-    /// This function currently only allows for the 80 addresses as in the original Marklin-motorola protocol and ignores
-    /// extended addresses that have since been implemented. As such, addresses that are considered illegal will return None.
-    /// This includes the idle packet address.
+
+    /// Returns a decimal reprenstation of the packet's trinary address in the range 0-80.
+    /// This is done using a trinary-to-decimal conversion algorithm.
+    /// An address of 0 represents the idle packet address.
     pub fn address(&self) -> Option<u8> {
         let mut ret_address: u8 = 0;
 
@@ -294,12 +305,15 @@ impl MmFuncPacket {
     }
 
     /// Returns an address in the range of 0-255 (u8) using the extended motorola address encoding.
-    /// This encoding uses the trinary-illegal values to encode the addresses 81-255. An address of 0 represents the idle address.
+    /// This is achieved by indexing a LUT with the raw address data.
+    /// The LUT is a superset of the standard 0-80 range.
+    /// This encoding uses the trinary-illegal values to encode the addresses 81-255.
+    /// An address of 0 represents the idle packet address.
     pub fn ext_address(&self) -> u8 {
         MM_ADDRESS_LUT[self.address as usize]
     }
 
-    // Boolean array for functions F1-F4. Index 0 = F1.
+    /// Boolean array for functions F1-F4. Index 0 = F1.
     pub fn states(&self) -> [bool; 4] {
         let mut states = [false; 4];
         states[0] = (self.data & 0b1100_0000) != 0;
