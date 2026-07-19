@@ -2,7 +2,10 @@ use crate::buildable_u8::BuildableU8;
 use crate::mm_packet::{MmLocoPacket, MmRawAccPacket};
 
 // Public Types
+/// A state machine for decoding Marklin-Motorola standard-frequency packets (locomotive transmission).
 pub type MmLocoMachine = MmMachine<MmLocoTiming>;
+
+/// A state machine for decoding Marklin-Motorola double-frequency packets (accessory transmission).
 pub type MmAccMachine = MmMachine<MmAccTiming>;
 
 // MmTiming
