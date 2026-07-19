@@ -18,7 +18,7 @@ Typical usage involves retrieving pulses from some buffer. These can be pulse du
 
 ```Rust
 static mut MM_LOCO_MACHINE: MmLocoMachine = MmLocoMachine::new();
-static const ADDRESS: u8 = 1;
+const ADDRESS: u8 = 1;
 
 loop {
 
@@ -63,3 +63,7 @@ loop {
     }
 }
 ```
+
+## Disorientation
+
+In the case that your calling code loses track of the contiguous pulses, you can parse any invalid value for the state machines to reset. The easiest and most consistent is `0`; this will always be invalid. Parsing `0` a good way to handle timer overcapture errors.

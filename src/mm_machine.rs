@@ -94,9 +94,7 @@ enum MmState {
     Data(BuildableU8),
 }
 
-// Since the machine is the packet builder there is no need for a "BuildablePacket" (as with Lenz/DCC protocol).
-// Instead, the fields of a packet are contained within the machine itself. These are cloned to make a returned
-// packet when packet reading is complete.
+/// A Marklin-Motorola protocol decoder. Feed a contiguous series of microsecond-resolution track pulses. Any invalid pulse will reset the machine.
 pub struct MmMachine<T: MmTiming> {
     // state machine values
     state: MmState,
@@ -111,6 +109,7 @@ pub struct MmMachine<T: MmTiming> {
 
 impl<T: MmTiming> MmMachine<T> {
 
+    /// Create a new MmMachine. Can be static.
     pub const fn new() -> Self {
         Self {
             state: MmState::Address(BuildableU8::new()),
@@ -122,6 +121,7 @@ impl<T: MmTiming> MmMachine<T> {
         }
     }
 
+    /// Parse a pulse (in microseconds) through the state machine. Will produce a packet when after a series of contiguous pulses representing the packet are parsed.
     pub fn advance(&mut self, pulse: u16) -> Option<T::Packet> {
 
         let mm_pulse = MmPulse::classify::<T>(pulse);
