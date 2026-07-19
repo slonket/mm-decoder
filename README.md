@@ -25,7 +25,7 @@ loop {
     // retrieve pulses from some buffer
     if let Ok(pulse) = pulse_cons.get() {
 
-        // processing MM loco protocol
+    // processing MM loco protocol
     if let Some(packet) = MM_LOCO_MACHINE.advance(pulse) {
 
         let address = packet.ext_address();
