@@ -1,4 +1,4 @@
 [package]
-name = "mm_decoder"
+name = "mm-decoder"
 version = "0.1.0"
 edition = "2024"
