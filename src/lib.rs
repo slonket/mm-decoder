@@ -1,6 +1,5 @@
 #![no_std]
 
-mod buildable_u8;
 pub(crate) mod mm_address_lut;
 mod mm_packet;
 mod mm_machine;

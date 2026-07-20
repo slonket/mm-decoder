@@ -1,4 +1,3 @@
-use crate::buildable_u8::BuildableU8;
 use crate::mm_packet::{MmLocoPacket, MmRawAccPacket};
 
 // Public Types
@@ -87,7 +86,36 @@ impl From<MmBit> for u8 {
     }
 }
 
+/// A wrapper type for u8 that allows "building" the data one bit at a time.
+/// Individual bits (bitmask u8) can be "pushed" to the byte. When 8 bits have been pushed,
+/// the byte is complete and will be returned by the `push()` function.
+struct BuildableU8 {
+    data: u8,
+    index: u8,
+}
 
+impl BuildableU8 {
+
+    const fn new() -> Self {
+        Self {
+            data: 0,
+            index: 0,
+        }
+    }
+
+    fn push(&mut self, bit: u8) -> Option<u8> {
+
+        self.data = (self.data << 1) | (bit & 0x01);
+        self.index += 1;
+
+        if self.index >= 8 {
+            self.index = 0;
+            return Some(self.data);
+        }
+
+        None
+    }
+}
 
 // MmMachine
 enum MmState {
